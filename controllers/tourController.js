@@ -1,66 +1,63 @@
-import fs from 'fs';
-import path from 'path';
+import tourModel from '../model/tourModel.js';
+import * as apiUtils from '../utils/apiFeatures.js';
 
-const __dirname = path.resolve();
-
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, 'utf-8')
-);
-
-export function getTours(_, res) {
-  res
-    .status(200)
-    .json({ status: 'success', results: tours.length, data: { tours } });
-}
-
-export function addTour(req, res) {
-  const _id = tours[tours.length - 1]._id + 1;
-  const newTour = Object.assign({ _id }, req.body);
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours.json`,
-    JSON.stringify(tours),
-    (err) => {
-      if (err) throw err;
-      res.status(201).json({ status: 'success', data: { tour: newTour } });
-    }
-  );
-}
-
-export function patchTour(_, res) {
-  res
-    .status(200)
-    .json({ status: 'success', message: 'Patched tour', data: {} });
-}
-
-export function deleteTour(_, res) {
-  res
-    .status(200)
-    .json({ status: 'success', message: 'Deleted tour', data: null });
-}
-
-export function getTour(req, res) {
-  const id = req.params.id * 1;
-  const tour = tours[id];
-  res.status(200).json({ status: 'success', data: { tour } });
-}
-
-export function checkId(req, res, next, val) {
-  if (val > tours.length - 1 || val < 0) {
-    return res.status(400).json({ status: 'fail', message: 'Invalid id' });
+export async function getTours(req, res) {
+  try {
+    let query = tourModel.find(apiUtils.filterQuery({ ...req.query }));
+    query = apiUtils.sortBy(query, req.query);
+    query = apiUtils.sortFields(query, req.query);
+    query = apiUtils.pagination(query, req.query);
+    const tours = await query;
+    res.status(200).json({
+      status: 'success',
+      message: 'Tours fetched',
+      data: { length: tours.length, tours },
+    });
+  } catch (err) {
+    res.status(404).json({ status: 'fail', message: err.message });
   }
-  next();
 }
 
-export function checkBody(req, res, next) {
-  const checkArr = ['name', 'price'];
-  checkArr.forEach((param) => {
-    if (!req.body[param]) {
-      return res
-        .status(400)
-        .json({ status: 'fail', message: `Missing ${param}. Bad request` });
-    }
-  });
+export async function addTour(req, res) {
+  try {
+    const newTour = await tourModel.create(req.body);
+    res.status(200).json({ status: 'success', data: newTour });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
+  }
+}
 
-  next();
+export async function patchTour(req, res) {
+  try {
+    const { id } = req.params;
+    const tour = await tourModel.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    res
+      .status(200)
+      .json({ status: 'success', message: 'Tour updated', data: tour });
+  } catch (err) {
+    res.status(404).json({ status: 'fail', message: err.message });
+  }
+}
+
+export async function deleteTour(req, res) {
+  try {
+    const { id } = req.params;
+    await tourModel.findByIdAndDelete(id);
+    res.status(200).json({ status: 'success' });
+  } catch (err) {
+    res.status(404).json({ status: 'fail', message: err.message });
+  }
+}
+
+export async function getTour(req, res) {
+  try {
+    const { id } = req.params;
+    const tour = await tourModel.findById(id);
+    res.status(200).json({ status: 'success', data: tour });
+  } catch (err) {
+    res.status(404).json({ status: 'fail', message: err.message });
+  }
 }
