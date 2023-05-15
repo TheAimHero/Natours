@@ -6,6 +6,10 @@ export const tourRouter = express.Router();
 
 tourRouter.route('/').get(Tours.getTours).post(Tours.addTour);
 
+tourRouter.route('/tour-stats').get(Tours.getTourStats);
+
+tourRouter.route('/monthly-plan/:year').get(Tours.getMonthlyPlan);
+
 tourRouter
   .route('/:id')
   .get(Tours.getTour)
