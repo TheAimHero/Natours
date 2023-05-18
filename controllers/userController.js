@@ -1,42 +1,38 @@
-import fs from 'fs';
-import path from 'path';
+import usersModel from '../model/usersModel.js';
+import appError from '../utils/appError.js';
+import catchAsync from '../utils/catchAsync.js';
+import { filterObj } from '../utils/filterObj.js';
 
-const __dirname = path.resolve();
+export const getUsers = catchAsync(async (_, res, __) => {
+  const users = await usersModel.find();
+  res.status(200).json({ status: 'success', data: { users } });
+});
 
-const users = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/users.json`)
-);
-
-export function getUsers(_, res) {
-  res
-    .status(200)
-    .json({ status: 'success', message: 'Users found', data: users });
-}
-
-export function addUser(req, res) {
-  const id = users[users.length - 1]._id + 1;
-  const newUser = Object.assign({ _id: id }, req.body);
-  users.push(newUser);
-  fs.writeFileSync(
-    `${__dirname}/dev-data/data/users.json`,
-    JSON.stringify(users)
+export const updateMe = catchAsync(async (req, res, next) => {
+  if (req.body.password)
+    return next(
+      new appError(
+        'Please do not update password. Please use /update-password',
+        400
+      )
+    );
+  const allowedFields = ['name', 'email'];
+  const updateContent = filterObj(req.body, allowedFields);
+  const updatedUser = await usersModel.findByIdAndUpdate(
+    req.user.id,
+    updateContent,
+    { new: true, runValidators: true }
   );
-  res
-    .status(201)
-    .json({ status: 'success', message: 'User added', data: newUser });
-}
+  res.status(200).json({
+    status: 'success',
+    data: { user: updatedUser },
+  });
+});
 
-export function getUser(req, res) {
-  const { id } = req.params;
-  const user = users.find((user) => user._id === id);
-  if (!user) {
-    res.status(404).json({ status: 'fail', message: 'User not found' });
-  } else {
-    res
-      .status(200)
-      .json({ status: 'success', message: 'User found', data: { user } });
-  }
-}
+export const deleteMe = catchAsync(async (req, res, next) => {
+  await usersModel.findByIdAndUpdate(req.user.id, { activated: false });
+  res.status(204).json({ status: 'success', data: null });
+});
 
 export function updateUser(req, res) {
   const { id } = req.params;

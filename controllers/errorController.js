@@ -4,6 +4,7 @@ function sendErrorDev(err, res) {
   return res.status(err.statusCode).json({
     status: err.status,
     error: err,
+    message: err.message,
     stack: err.stack,
   });
 }
@@ -48,6 +49,12 @@ export default function (err, _, res, __) {
     if (err.name === 'CastError') err = handleCastError(err);
     if (err.code === 11000) err = handleDuplicateField(err);
     if (err.name === 'ValidationError') err = handleValidationError(err);
+    if (err.name === 'JsonWebTokenError') {
+      err = new appError('Invalid token. Please login again', 401);
+    }
+    if (err.name === 'TokenExpiredError') {
+      err = new appError('Your token has expired. Please login again', 401);
+    }
     return sendErrorProd(err, res);
   }
 }

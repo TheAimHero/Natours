@@ -38,7 +38,7 @@ export const patchTour = catchAsync(async (req, res, next) => {
 
 export const deleteTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const tour = await tourModel.findByIdAndDelete(id);
+  const tour = await tourModel.deleteOne({ _id: id });
   if (!tour) {
     return next(new appError('No tours found with the requested id', 404));
   }
