@@ -89,11 +89,11 @@ tourSchema.virtual('tourDurationWeek').get(function () {
   return this.duration / 7;
 });
 
-tourSchema.pre(/^find/, function (next) {
-  this.start = Date.now();
-  this.find({ secretTour: { $ne: true } });
-  next();
-});
+// tourSchema.pre(/^find/, function (next) {
+//   this.start = Date.now();
+//   this.find({ secretTour: { $ne: true } });
+//   next();
+// });
 
 tourSchema.post(/^find/, function (doc, next) {
   console.log(`The query took ${Date.now() - this.start} milliseconds`);

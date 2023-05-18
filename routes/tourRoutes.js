@@ -1,7 +1,7 @@
 import express from 'express';
 
 import * as Tours from '../controllers/tourController.js';
-import { protect } from '../controllers/authController.js';
+import { protect, restrict } from '../controllers/authController.js';
 
 export const tourRouter = express.Router();
 
@@ -15,4 +15,4 @@ tourRouter
   .route('/:id')
   .get(Tours.getTour)
   .patch(Tours.patchTour)
-  .delete(Tours.deleteTour);
+  .delete(protect, restrict('admin', 'lead-guide'), Tours.deleteTour);
