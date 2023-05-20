@@ -3,4 +3,5 @@ node_modules/
 **/nodemon.json
 **/tsconfig.json
 **/Session.vim
+**/.eslintrc.json
 

@@ -8,14 +8,14 @@ import appError from '../utils/appError.js';
 import * as tokenUtils from '../utils/tokenUtils.js';
 import { sendEmail } from '../utils/email.js';
 
-export const signUp = catchAsync(async (req, res, _) => {
-  const { name, email, password, passwordConfirm, passwordChangedAt } =
-    req.body;
-  const newUser = await usersModel.create({
+export const signUp = catchAsync(async (req, res, _next) => {
+  const { name, email, role, password, passwordConfirm } = req.body;
+  const user = await usersModel.create({
     name: String(name),
     email: String(email),
     password: String(password),
     passwordConfirm: String(passwordConfirm),
+    role: String(role),
   });
   user.password = user.passwordChangedAt = undefined;
   createSendToken(user, 201, res);
@@ -39,7 +39,7 @@ export const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-export const protect = catchAsync(async (req, _, next) => {
+export const protect = catchAsync(async (req, _res, next) => {
   let token =
     req.headers.authorization &&
     tokenUtils.extractToken(req.headers.authorization);
@@ -55,7 +55,6 @@ export const protect = catchAsync(async (req, _, next) => {
   }
 
   req.user = freshUser;
-
   next();
 });
 
@@ -74,7 +73,6 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     return next(new appError('Invalid email', 400));
   }
   const user = await usersModel.findOne({ email });
-  console.log(user);
   if (!user) return next(new appError('User not found', 404));
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
@@ -91,7 +89,6 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
       .status(200)
       .json({ status: 'success', message: 'Token sent to email!' });
   } catch (err) {
-    console.log(err);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });

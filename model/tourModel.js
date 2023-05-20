@@ -78,6 +78,25 @@ const tourSchema = new mongoose.Schema(
     startDates: { type: [Date], default: Date.now() },
 
     secretTour: { type: Boolean, default: false },
+
+    startLocation: {
+      type: { type: String, default: 'Point', enum: ['Point'] },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+
+    locations: [
+      {
+        type: { type: String, default: 'Point', enum: ['Point'] },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+
+    guides: [{ type: mongoose.Schema.ObjectId, unique: true, ref: 'User' }],
   },
   {
     toJSON: { virtuals: true },
@@ -85,8 +104,10 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-tourSchema.virtual('tourDurationWeek').get(function () {
-  return this.duration / 7;
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
 });
 
 tourSchema.pre(/^find/, function (next) {
@@ -95,7 +116,7 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
-tourSchema.post(/^find/, function (doc, next) {
+tourSchema.post(/^find/, function (_, next) {
   console.log(`The query took ${Date.now() - this.start} milliseconds`);
   next();
 });

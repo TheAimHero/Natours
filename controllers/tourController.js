@@ -1,60 +1,23 @@
 import tourModel from '../model/tourModel.js';
-import apiUtils from '../utils/apiFeatures.js';
 import catchAsync from '../utils/catchAsync.js';
-import appError from '../utils/appError.js';
+import * as factory from './factoryHandler.js';
 
-export const getTours = catchAsync(async (req, res, next) => {
-  const features = new apiUtils(tourModel.find(), req.query)
-    .filterQuery()
-    .sortBy()
-    .sortFields()
-    .pagination();
-  const tours = await features.query;
-  res.status(200).json({
-    status: 'success',
-    message: 'Tours fetched',
-    data: { length: tours.length, tours },
-  });
-});
+export const getTours=factory.getAll(tourModel);
 
-export const addTour = catchAsync(async (req, res, next) => {
-  const newTour = await tourModel.create(req.body);
-  res.status(200).json({ status: 'success', data: newTour });
-});
+export const addTour = factory.createOne(tourModel);
 
-export const patchTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await tourModel.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  if (!tour) {
-    return next(new appError('No tours found with the requested id', 404));
-  }
-  res
-    .status(200)
-    .json({ status: 'success', message: 'Tour updated', data: tour });
-});
+export const updateTour = factory.updateOne(tourModel);
 
-export const deleteTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await tourModel.deleteOne({ _id: id });
-  if (!tour) {
-    return next(new appError('No tours found with the requested id', 404));
-  }
-  res.status(200).json({ status: 'success' });
-});
+export const deleteTour = factory.deleteOne(tourModel);
 
-export const getTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await tourModel.findById(id);
-  if (!tour) {
-    return next(new appError('No tours found with the requested id', 404));
-  }
-  res.status(200).json({ status: 'success', data: tour });
-});
+const populateObj = [
+  { path: 'guides', select: '-__v -passwordChangedAt' },
+  { path: 'reviews', select: '-__v -createdAt -updatedAt' },
+];
 
-export const getTourStats = catchAsync(async (_, res, next) => {
+export const getTour = factory.getOne(tourModel, populateObj);
+
+export const getTourStats = catchAsync(async (_req, res, _next) => {
   const stats = await tourModel.aggregate([
     {
       $group: {

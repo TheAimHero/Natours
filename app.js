@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
@@ -11,6 +12,7 @@ import hpp from 'hpp';
 import appError from './utils/appError.js';
 import { tourRouter } from './routes/tourRoutes.js';
 import { userRouter } from './routes/userRoutes.js';
+import { reviewRouter } from './routes/reviewRoutes.js';
 import errorController from './controllers/errorController.js';
 
 dotenv.config();
@@ -35,6 +37,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, _, next) => {
   const message = `Can't find ${req.originalUrl} on this server`;
@@ -49,13 +52,13 @@ const server = app.listen(
   console.log('Listening at port 3000')
 );
 
-process.on('unhandledRejection', (err, _) => {
+process.on('unhandledRejection', (err, _next) => {
   console.log(err.name, err.message);
   console.log('UNHANDLED REJECTION! Shutting down...');
   server.close(() => process.exit(1));
 });
 
-process.on('uncaughtException', (err, _) => {
+process.on('uncaughtException', (err, _next) => {
   console.log(err.name, err.message);
   console.log('UNCAUGHT EXCEPTION! Shutting down...');
   server.close(() => process.exit(1));

@@ -1,3 +1,4 @@
+import { query } from 'express';
 import tourModel from '../model/tourModel.js';
 
 class apiFeaturs {
