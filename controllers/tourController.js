@@ -1,8 +1,9 @@
 import tourModel from '../model/tourModel.js';
+import appError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import * as factory from './factoryHandler.js';
 
-export const getTours=factory.getAll(tourModel);
+export const getTours = factory.getAll(tourModel);
 
 export const addTour = factory.createOne(tourModel);
 
@@ -16,6 +17,53 @@ const populateObj = [
 ];
 
 export const getTour = factory.getOne(tourModel, populateObj);
+
+// /tours-within/:distance/center/:latlng/unit/:unit
+export const getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  if (unit !== 'mi' && unit !== 'km') {
+    return next(new appError('Invalid unit', 400));
+  }
+  if (!lat || !lng) {
+    const errMessage =
+      'Please provide latitude and longiture in format lat,lng';
+    return next(new appError(errMessage, 400));
+  }
+  const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+  // NOTE: Mongodb stores lat first and lng second
+  const tours = await tourModel.find({
+    startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } },
+  });
+  res
+    .status(200)
+    .json({ status: 'success', results: tours.length, data: tours });
+});
+
+export const getDistances = catchAsync(async (req, res, next) => {
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(',');
+  if (unit !== 'mi' && unit !== 'km') {
+    return next(new appError('Invalid unit', 400));
+  }
+  if (!lat || !lng) {
+    const errMessage =
+      'Please provide latitude and longiture in format lat,lng';
+    return next(new appError(errMessage, 400));
+  }
+  const distances = await tourModel.aggregate([
+    {
+      // NOTE: geoNear always must be the first stage
+      $geoNear: {
+        near: { type: 'Point', coordinates: [lng * 1, lat * 1] },
+        distanceField: 'distance',
+        distanceMultiplier: unit === 'mi' ? 0.000621371 : 0.001,
+      },
+    },
+    { $project: { distance: 1, name: 1 } },
+  ]);
+  res.status(200).json({ status: 'success', data: distances });
+});
 
 export const getTourStats = catchAsync(async (_req, res, _next) => {
   const stats = await tourModel.aggregate([

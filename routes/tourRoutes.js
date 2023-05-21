@@ -17,6 +17,12 @@ tourRouter
 tourRouter.route('/tour-stats').get(Tours.getTourStats);
 
 tourRouter
+  .route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(Tours.getToursWithin);
+
+tourRouter.route('/distances/:latlng/unit/:unit').get(Tours.getDistances);
+
+tourRouter
   .route('/monthly-plan/:year')
   .get(
     auth.protect,
