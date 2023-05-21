@@ -53,14 +53,14 @@ export function getOne(Model, populateOptionsArray) {
 
 export function getAll(Model) {
   return catchAsync(async (req, res, _next) => {
-    //@todo: add filter only for reviews fix later
+    // TODO: add filter only for reviews fix later
+    // HACK: added here but should be in the reviewsController
     const filter = req.params.tourId ? { tour: req.params.tourId } : {};
     const features = new apiUtils(Model.find(filter), req.query)
       .filterQuery()
       .sortBy()
       .sortFields()
       .pagination();
-    features.query = features.query.lean();
     const doc = await features.query;
     res.status(200).json({
       status: 'success',

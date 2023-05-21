@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+import tourModel from './tourModel.js';
+
 const reviewSchema = new mongoose.Schema(
   {
     review: { type: String, required: true },
@@ -28,6 +30,28 @@ const reviewSchema = new mongoose.Schema(
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
+
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  const stats = await this.aggregate([
+    { $match: { tour: tourId } },
+    {
+      $group: {
+        _id: '$tour',
+        nRatings: { $sum: 1 },
+        avgRating: { $avg: '$rating' },
+      },
+    },
+  ]);
+
+  await tourModel.findByIdAndUpdate(
+    tourId,
+    { ratingsAverage: stats[0].avgRating, ratingsQuantity: stats[0].nRatings },
+    { new: true, runValidators: true }
+  );
+};
+
+//@note: don't use lean() causes the removal of necessary data ( downstream ) from query
 reviewSchema.pre(/^find/, function (next) {
   this.select('-__v -createdAt').populate({
     path: 'user',
@@ -37,8 +61,16 @@ reviewSchema.pre(/^find/, function (next) {
   //   path: 'tour',
   //   select: 'name ratingsAverage ',
   // });
-  // .lean();
   next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  const r = await this.findOne().clone();
+  await r.constructor.calcAverageRatings(r.tour);
+});
+
+reviewSchema.post('save', function () {
+  this.constructor.calcAverageRatings(this.tour);
 });
 
 export default mongoose.model('Review', reviewSchema);

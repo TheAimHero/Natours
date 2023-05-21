@@ -12,4 +12,7 @@ mongoose.connect(process.env.DATABASE_LOCAL);
 
 const data = JSON.parse(fs.readFileSync('./dev-data/data/tours.json', 'utf-8'));
 
-tourModel.insertMany(data).finally(mongoose.disconnect);
+// tourModel.insertMany(data).finally(mongoose.disconnect);
+data.forEach(tour => {
+  tourModel.create(tour);
+});
