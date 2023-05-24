@@ -8,7 +8,7 @@ export const reviewRouter = express.Router({ mergeParams: true });
 reviewRouter
   .use(auth.protect)
   .route('/')
-  .get(auth.restrict('admin', 'lead-guide'), Reviews.getReviews)
+  .get(auth.restrict('admin', 'user', 'lead-guide'), Reviews.getReviews)
   .post(auth.restrict('user'), Reviews.setTourUserId, Reviews.createReview);
 
 reviewRouter.use(auth.protect).route('/:id').get(Reviews.getReview);

@@ -16,6 +16,7 @@ function sendErrorProd(err, res) {
       message: err.message,
     });
   } else {
+    // eslint-disable-next-line no-console
     console.error('ERROR ==> ', err);
     res.status(err.statusCode).json({
       status: 'error',
@@ -40,7 +41,7 @@ function handleValidationError(err) {
   return new appError(message, 400);
 }
 
-export default function (err, _, res, __) {
+export default function (err, _, res, _next) {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {

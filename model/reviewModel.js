@@ -51,7 +51,7 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
   );
 };
 
-//@note: don't use lean() causes the removal of necessary data ( downstream ) from query
+// NOTE: don't use lean() causes the removal of necessary data ( downstream ) from query
 reviewSchema.pre(/^find/, function (next) {
   this.select('-__v -createdAt').populate({
     path: 'user',
