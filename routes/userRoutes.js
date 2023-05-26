@@ -10,6 +10,7 @@ userRouter.post('/forgot-password', auth.forgotPassword);
 userRouter.patch('/reset-password/:token', auth.resetPassword);
 
 userRouter.use(auth.protect);
+userRouter.post('/logout', auth.logout);
 
 userRouter.route('/get-me').get(Users.getMe, Users.getUser);
 

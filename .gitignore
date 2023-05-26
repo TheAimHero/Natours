@@ -4,4 +4,4 @@ node_modules/
 **/tsconfig.json
 **/Session.vim
 **/.eslintrc.json
-
+.parcel-cache/

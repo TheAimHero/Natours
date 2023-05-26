@@ -9,6 +9,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import hpp from 'hpp';
 // import pug from 'pug';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 const __dirname = path.resolve();
 
@@ -34,6 +35,7 @@ app.use(xss());
 app.use(hpp({ whiteList: ['duration'] }));
 mongoose.connect(process.env.DATABASE_LOCAL).then(console.log('DB connected'));
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -43,6 +45,11 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again in an hour!',
 });
 app.use('/api', limiter);
+
+app.use((req, _res, next) => {
+  console.log(req.cookies);
+  next();
+});
 
 app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);

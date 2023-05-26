@@ -1,5 +1,5 @@
 doctype html
-html( lang='en' )
+html(lang='en')
   head
     block head
       meta( charset='UTF-8' )
@@ -14,5 +14,8 @@ html( lang='en' )
     include _header
 
     block content
+    script( src="https://unpkg.com/axios/dist/axios.min.js" )
+    script( type="module" src='/js/bundle.js')
 
     include _footer
+

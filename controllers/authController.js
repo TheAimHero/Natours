@@ -39,10 +39,15 @@ export const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+export const logout = catchAsync(async (req, res, next) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+});
+
 export const protect = catchAsync(async (req, _res, next) => {
-  let token =
-    req.headers.authorization &&
-    tokenUtils.extractToken(req.headers.authorization);
+  let token = tokenUtils.extractToken(req);
 
   const decoded = token && (await tokenUtils.verifyToken(token));
   if (!decoded) return next(new appError('You are not logged in!', 401));
@@ -66,6 +71,21 @@ export const restrict = (...roles) => {
     next();
   };
 };
+
+// NOTE: Only for rendered pages no errors possible
+export const isLoggedIn = catchAsync(async (req, res, next) => {
+  if (!req.cookies.jwt) return next();
+  const decoded = await tokenUtils.verifyToken(req.cookies.jwt);
+  if (!decoded) return next(new appError('You are not logged in!', 401));
+
+  const freshUser = await usersModel.findById(decoded.id);
+
+  if (!freshUser) return next();
+  if (freshUser.changePassword(decoded.iat)) return next();
+
+  res.locals.user = freshUser;
+  next();
+});
 
 export const forgotPassword = catchAsync(async (req, res, next) => {
   const email = String(req.body.email);
