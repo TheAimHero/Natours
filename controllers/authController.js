@@ -39,11 +39,11 @@ export const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-export const logout = catchAsync(async (req, res, next) => {
+export const logout = catchAsync(async (_req, res, _next) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
   });
+  res.status(200).json({ status: 'success' });
 });
 
 export const protect = catchAsync(async (req, _res, next) => {
@@ -76,7 +76,7 @@ export const restrict = (...roles) => {
 export const isLoggedIn = catchAsync(async (req, res, next) => {
   if (!req.cookies.jwt) return next();
   const decoded = await tokenUtils.verifyToken(req.cookies.jwt);
-  if (!decoded) return next(new appError('You are not logged in!', 401));
+  if (!decoded) return next();
 
   const freshUser = await usersModel.findById(decoded.id);
 

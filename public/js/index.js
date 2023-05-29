@@ -7,7 +7,6 @@ if (loginForm) {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    console.log(email, password);
     login(email, password);
   });
 }
@@ -19,7 +18,7 @@ if (mapBox) {
   displayMap(locationsArray);
 }
 
-const logoutBtn = document.getElementById('logout');
+const logoutBtn = document.querySelector('.nav__el--logout');
 if (logoutBtn) {
   logoutBtn.addEventListener('click', (e) => {
     e.preventDefault();

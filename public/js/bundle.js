@@ -34,15 +34,16 @@ async function $e33d9ff231aec008$export$596d806903d1f59e(email, password) {
 async function $e33d9ff231aec008$export$a0973bcfe11b05c9() {
     try {
         // TODO: Learn to do this the vanilla way
-        const res = axios({
+        const res = await axios({
             method: "GET",
             url: "http://localhost:3000/api/v1/users/logout"
         });
         if (res.data.status === "success") {
             (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("success", "Logout Successful");
+            location.reload(true);
             window.setTimeout(()=>{
                 window.location.href = "/";
-            }, 1000);
+            }, 100);
         }
     } catch (err) {
         (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.message);
@@ -86,7 +87,6 @@ if ($1cd085a7ac742057$var$loginForm) $1cd085a7ac742057$var$loginForm.addEventLis
     e.preventDefault();
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    console.log(email, password);
     (0, $e33d9ff231aec008$export$596d806903d1f59e)(email, password);
 });
 const $1cd085a7ac742057$var$mapBox = document.getElementById("map");
@@ -95,7 +95,7 @@ if ($1cd085a7ac742057$var$mapBox) {
     const locationsArray = JSON.parse(locations);
     (0, $f6b1c9ed51ec7162$export$4c5dd147b21b9176)(locationsArray);
 }
-const $1cd085a7ac742057$var$logoutBtn = document.getElementById("logout");
+const $1cd085a7ac742057$var$logoutBtn = document.querySelector(".nav__el--logout");
 if ($1cd085a7ac742057$var$logoutBtn) $1cd085a7ac742057$var$logoutBtn.addEventListener("click", (e)=>{
     e.preventDefault();
     (0, $e33d9ff231aec008$export$a0973bcfe11b05c9)();

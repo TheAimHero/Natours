@@ -6,11 +6,11 @@ export const userRouter = express.Router();
 
 userRouter.post('/signup', auth.signUp);
 userRouter.post('/login', auth.login);
+userRouter.get('/logout', auth.logout);
 userRouter.post('/forgot-password', auth.forgotPassword);
 userRouter.patch('/reset-password/:token', auth.resetPassword);
 
 userRouter.use(auth.protect);
-userRouter.post('/logout', auth.logout);
 
 userRouter.route('/get-me').get(Users.getMe, Users.getUser);
 

@@ -24,15 +24,16 @@ export async function login(email, password) {
 export async function logout() {
   try {
     // TODO: Learn to do this the vanilla way
-    const res = axios({
+    const res = await axios({
       method: 'GET',
       url: 'http://localhost:3000/api/v1/users/logout',
     });
     if (res.data.status === 'success') {
       showAlerts('success', 'Logout Successful');
-      window.setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
+      location.reload(true);
+        window.setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
     }
   } catch (err) {
     showAlerts('error', err.message);
