@@ -33,5 +33,11 @@ tourRouter
 tourRouter
   .route('/:id')
   .get(Tours.getTour)
-  .patch(auth.protect, auth.restrict('admin', 'lead-guide'), Tours.updateTour)
+  .patch(
+    auth.protect,
+    auth.restrict('admin', 'lead-guide'),
+    Tours.uploadTourPhotos,
+    Tours.resizeTourPhotos,
+    Tours.updateTour
+  )
   .delete(protect, restrict('admin', 'lead-guide'), Tours.deleteTour);

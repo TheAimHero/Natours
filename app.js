@@ -46,8 +46,8 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-app.use((req, _res, next) => {
-  console.log(req.cookies);
+app.use((_req, _res, next) => {
+  // console.log(req.cookies);
   next();
 });
 

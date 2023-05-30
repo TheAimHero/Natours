@@ -133,12 +133,12 @@ if ($1cd085a7ac742057$var$logoutBtn) $1cd085a7ac742057$var$logoutBtn.addEventLis
 const $1cd085a7ac742057$var$userDataForm = document.querySelector(".form--user-data");
 if ($1cd085a7ac742057$var$userDataForm) $1cd085a7ac742057$var$userDataForm.addEventListener("submit", (e)=>{
     e.preventDefault();
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    (0, $a7bd2b0e83ecbd10$export$f558026a994b6051)({
-        name: name,
-        email: email
-    });
+    const form = new FormData();
+    form.append("name", document.getElementById("name").value);
+    form.append("email", document.getElementById("email").value);
+    console.log(document.getElementById("photo").files[0]);
+    form.append("photo", document.getElementById("photo").files[0]);
+    (0, $a7bd2b0e83ecbd10$export$f558026a994b6051)(form);
 });
 const $1cd085a7ac742057$var$userPassword = document.querySelector(".form-user-settings");
 if ($1cd085a7ac742057$var$userPassword) $1cd085a7ac742057$var$userPassword.addEventListener("submit", (e)=>{

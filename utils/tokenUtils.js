@@ -10,8 +10,11 @@ export function signToken(id) {
 
 export function extractToken(req) {
   let token = undefined;
-  if (req.headers.authorization && tokenStr.startsWith('Bearer ')) {
-    token = tokenStr.split(' ')[1];
+  if (req.headers.authorization) {
+    const tokenStr = req.headers.authorization;
+    if (tokenStr.startsWith('Bearer ')) {
+      token = tokenStr.split(' ')[1];
+    }
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }

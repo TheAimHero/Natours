@@ -1,4 +1,5 @@
 import express from 'express';
+
 import * as Users from '../controllers/userController.js';
 import * as auth from '../controllers/authController.js';
 
@@ -16,7 +17,12 @@ userRouter.route('/get-me').get(Users.getMe, Users.getUser);
 
 userRouter.patch('/update-password', auth.updatePassword);
 
-userRouter.patch('/update-me', auth.restrict('user'), Users.updateMe);
+userRouter.patch(
+  '/update-me',
+  Users.uploadUserPhoto,
+  Users.resizePhoto,
+  Users.updateMe
+);
 userRouter.delete('/delete-me', auth.restrict('user'), Users.deleteMe);
 
 userRouter.route('/').get(auth.restrict('admin', 'lead-guide'), Users.getUsers);
