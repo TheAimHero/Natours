@@ -8,10 +8,12 @@ export function signToken(id) {
   });
 }
 
-export function extractToken(tokenStr) {
+export function extractToken(req) {
   let token = undefined;
-  if (tokenStr.startsWith('Bearer ')) {
+  if (req.headers.authorization && tokenStr.startsWith('Bearer ')) {
     token = tokenStr.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
   return token;
 }

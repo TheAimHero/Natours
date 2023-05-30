@@ -8,14 +8,14 @@ import appError from '../utils/appError.js';
 import * as tokenUtils from '../utils/tokenUtils.js';
 import { sendEmail } from '../utils/email.js';
 
-export const signUp = catchAsync(async (req, res, _) => {
-  const { name, email, password, passwordConfirm, passwordChangedAt } =
-    req.body;
-  const newUser = await usersModel.create({
+export const signUp = catchAsync(async (req, res, _next) => {
+  const { name, email, role, password, passwordConfirm } = req.body;
+  const user = await usersModel.create({
     name: String(name),
     email: String(email),
     password: String(password),
     passwordConfirm: String(passwordConfirm),
+    role: String(role),
   });
   user.password = user.passwordChangedAt = undefined;
   createSendToken(user, 201, res);
@@ -39,10 +39,15 @@ export const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-export const protect = catchAsync(async (req, _, next) => {
-  let token =
-    req.headers.authorization &&
-    tokenUtils.extractToken(req.headers.authorization);
+export const logout = catchAsync(async (_req, res, _next) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+  });
+  res.status(200).json({ status: 'success' });
+});
+
+export const protect = catchAsync(async (req, res, next) => {
+  let token = tokenUtils.extractToken(req);
 
   const decoded = token && (await tokenUtils.verifyToken(token));
   if (!decoded) return next(new appError('You are not logged in!', 401));
@@ -55,7 +60,7 @@ export const protect = catchAsync(async (req, _, next) => {
   }
 
   req.user = freshUser;
-
+  res.locals.user = freshUser;
   next();
 });
 
@@ -68,13 +73,27 @@ export const restrict = (...roles) => {
   };
 };
 
+// NOTE: Only for rendered pages no errors possible
+export const isLoggedIn = catchAsync(async (req, res, next) => {
+  if (!req.cookies.jwt) return next();
+  const decoded = await tokenUtils.verifyToken(req.cookies.jwt);
+  if (!decoded) return next();
+
+  const freshUser = await usersModel.findById(decoded.id);
+
+  if (!freshUser) return next();
+  if (freshUser.changePassword(decoded.iat)) return next();
+
+  res.locals.user = freshUser;
+  next();
+});
+
 export const forgotPassword = catchAsync(async (req, res, next) => {
   const email = String(req.body.email);
   if (!validator.isEmail(email)) {
     return next(new appError('Invalid email', 400));
   }
   const user = await usersModel.findOne({ email });
-  console.log(user);
   if (!user) return next(new appError('User not found', 404));
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
@@ -91,7 +110,6 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
       .status(200)
       .json({ status: 'success', message: 'Token sent to email!' });
   } catch (err) {
-    console.log(err);
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });

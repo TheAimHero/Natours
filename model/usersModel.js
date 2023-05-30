@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
   activated: { type: Boolean, default: true, select: false },
 });
 
-//prettier-ignore
+// prettier-ignore
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };

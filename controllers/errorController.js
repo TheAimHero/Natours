@@ -1,26 +1,51 @@
 import appError from '../utils/appError.js';
 
-function sendErrorDev(err, res) {
-  return res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
-  });
-}
-
-function sendErrorProd(err, res) {
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
+function sendErrorDev(err, req, res) {
+  // eslint-disable-next-line no-console
+  console.error('ERROR ==> ', err);
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
       status: err.status,
+      error: err,
       message: err.message,
+      stack: err.stack,
     });
   } else {
-    console.error('ERROR ==> ', err);
-    res.status(err.statusCode).json({
-      status: 'error',
-      message: 'Something went wrong',
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      msg: err.message,
     });
+  }
+}
+
+function sendErrorProd(err, req, res) {
+  if (req.originalUrl.startsWith('/api')) {
+    if (err.isOperational) {
+      console.log(err.message);
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error('ERROR ==> ', err);
+      return res.status(500).json({
+        status: 'error',
+        message: 'Something went wrong',
+      });
+    }
+  } else {
+    if (err.isOperational) {
+      return res.status(err.statusCode).render('error', {
+        title: 'Something went wrong',
+        msg: err.message,
+      });
+    } else {
+      return res.status(err.statusCode).render('error', {
+        title: 'Something went wrong',
+        msg: 'Please try again later',
+      });
+    }
   }
 }
 
@@ -35,16 +60,16 @@ function handleDuplicateField(err) {
 }
 
 function handleValidationError(err) {
-  const errors = Object.values(err.errors).map(el => el.message);
+  const errors = Object.values(err.errors).map((el) => el.message);
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new appError(message, 400);
 }
 
-export default function (err, _, res, __) {
+export default function (err, req, res, _next) {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
   if (process.env.NODE_ENV === 'development') {
-    return sendErrorDev(err, res);
+    return sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     if (err.name === 'CastError') err = handleCastError(err);
     if (err.code === 11000) err = handleDuplicateField(err);
@@ -55,6 +80,6 @@ export default function (err, _, res, __) {
     if (err.name === 'TokenExpiredError') {
       err = new appError('Your token has expired. Please login again', 401);
     }
-    return sendErrorProd(err, res);
+    return sendErrorProd(err, req, res);
   }
 }

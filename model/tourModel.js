@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import slugify from 'slugify';
 
 const tourSchema = new mongoose.Schema(
   {
@@ -31,7 +32,7 @@ const tourSchema = new mongoose.Schema(
     priceDiscount: {
       type: Number,
       validate: {
-        validator: function (val) {
+        validator: function(val) {
           return val < this.price;
         },
         message: 'Discount price ({VALUE}) should be below regular price',
@@ -43,6 +44,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       max: [10, 'Ratings must be less than 10'],
       min: [0, 'Ratings must be more than 0'],
+      set: val => Math.round(val * 10) / 10,
     },
 
     ratingsQuantity: { type: Number, default: 0 },
@@ -78,6 +80,27 @@ const tourSchema = new mongoose.Schema(
     startDates: { type: [Date], default: Date.now() },
 
     secretTour: { type: Boolean, default: false },
+
+    startLocation: {
+      type: { type: String, default: 'Point', enum: ['Point'] },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+
+    locations: [
+      {
+        type: { type: String, default: 'Point', enum: ['Point'] },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+
+    slug: { type: String, unique: true },
+
+    guides: [{ type: mongoose.Schema.ObjectId, unique: true, ref: 'User' }],
   },
   {
     toJSON: { virtuals: true },
@@ -85,24 +108,36 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-tourSchema.virtual('tourDurationWeek').get(function () {
-  return this.duration / 7;
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({startLocation: '2dsphere'});
+
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
 });
 
-tourSchema.pre(/^find/, function (next) {
+tourSchema.pre('save', function(next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+tourSchema.pre(/^find/, function(next) {
   this.start = Date.now();
   this.find({ secretTour: { $ne: true } });
   next();
 });
 
-tourSchema.post(/^find/, function (doc, next) {
+tourSchema.post(/^find/, function(_, next) {
+  // eslint-disable-next-line no-console
   console.log(`The query took ${Date.now() - this.start} milliseconds`);
   next();
 });
 
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  next();
-});
+// tourSchema.pre('aggregate', function(next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   next();
+// });
 
 export default mongoose.model('Tour', tourSchema);
