@@ -1,6 +1,6 @@
 /* eslint-disable */ function $1eb0cc260df27e1b$export$27077c57cd15b0d5(type, msg) {
     $1eb0cc260df27e1b$export$516836c6a9dfc573();
-    const markup = `<div class="alert" alert--${type}">${msg}</div>`;
+    const markup = `<div class="alert alert--${type}">${msg}</div>`;
     document.querySelector("body").insertAdjacentHTML("afterbegin", markup);
     setTimeout($1eb0cc260df27e1b$export$516836c6a9dfc573, 5000);
 }
@@ -28,7 +28,7 @@ async function $e33d9ff231aec008$export$596d806903d1f59e(email, password) {
             }, 1000);
         }
     } catch (err) {
-        (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.message);
+        (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.response.data.message);
     }
 }
 async function $e33d9ff231aec008$export$a0973bcfe11b05c9() {
@@ -46,7 +46,7 @@ async function $e33d9ff231aec008$export$a0973bcfe11b05c9() {
             }, 100);
         }
     } catch (err) {
-        (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.message);
+        (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.response.data.message);
     }
 }
 
@@ -82,7 +82,37 @@ async function $e33d9ff231aec008$export$a0973bcfe11b05c9() {
 }
 
 
-const $1cd085a7ac742057$var$loginForm = document.querySelector("form");
+
+async function $a7bd2b0e83ecbd10$export$f558026a994b6051(data) {
+    try {
+        const res = await axios({
+            method: "PATCH",
+            url: "http://localhost:3000/api/v1/users/update-me",
+            data: data
+        });
+        if (res.data.status === "success") {
+            (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("success", "Settings updated successfully");
+            window.location.reload(true);
+        }
+    } catch (err) {
+        (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.response.data.message);
+    }
+}
+async function $a7bd2b0e83ecbd10$export$e2853351e15b7895(data) {
+    try {
+        const res = await axios({
+            method: "PATCH",
+            url: "http://localhost:3000/api/v1/users/update-password",
+            data: data
+        });
+        if (res.data.status === "success") (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("success", "Password updated successfully");
+    } catch (err) {
+        (0, $1eb0cc260df27e1b$export$27077c57cd15b0d5)("error", err.response.data.message);
+    }
+}
+
+
+const $1cd085a7ac742057$var$loginForm = document.querySelector(".form--login");
 if ($1cd085a7ac742057$var$loginForm) $1cd085a7ac742057$var$loginForm.addEventListener("submit", (e)=>{
     e.preventDefault();
     const email = document.getElementById("email").value;
@@ -99,6 +129,28 @@ const $1cd085a7ac742057$var$logoutBtn = document.querySelector(".nav__el--logout
 if ($1cd085a7ac742057$var$logoutBtn) $1cd085a7ac742057$var$logoutBtn.addEventListener("click", (e)=>{
     e.preventDefault();
     (0, $e33d9ff231aec008$export$a0973bcfe11b05c9)();
+});
+const $1cd085a7ac742057$var$userDataForm = document.querySelector(".form--user-data");
+if ($1cd085a7ac742057$var$userDataForm) $1cd085a7ac742057$var$userDataForm.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    (0, $a7bd2b0e83ecbd10$export$f558026a994b6051)({
+        name: name,
+        email: email
+    });
+});
+const $1cd085a7ac742057$var$userPassword = document.querySelector(".form-user-settings");
+if ($1cd085a7ac742057$var$userPassword) $1cd085a7ac742057$var$userPassword.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const passwordConfirm = document.getElementById("password-confirm").value;
+    const newPassword = document.getElementById("password").value;
+    const oldPassword = document.getElementById("password-current").value;
+    (0, $a7bd2b0e83ecbd10$export$e2853351e15b7895)({
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        passwordConfirm: passwordConfirm
+    });
 });
 
 

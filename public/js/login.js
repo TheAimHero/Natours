@@ -17,7 +17,7 @@ export async function login(email, password) {
       }, 1000);
     }
   } catch (err) {
-    showAlerts('error', err.message);
+    showAlerts('error', err.response.data.message);
   }
 }
 
@@ -31,11 +31,11 @@ export async function logout() {
     if (res.data.status === 'success') {
       showAlerts('success', 'Logout Successful');
       location.reload(true);
-        window.setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
+      window.setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     }
   } catch (err) {
-    showAlerts('error', err.message);
+    showAlerts('error', err.response.data.message);
   }
 }

@@ -9,6 +9,10 @@ export const getOverview = catchAsync(async (_req, res, _next) => {
   });
 });
 
+export const getAccount = (_req, res) => {
+  res.status(200).render('account', { title: 'Your account' });
+};
+
 export const getTour = catchAsync(async (req, res, _next) => {
   const tour = await tourModel
     .findOne({ slug: req.params.slug })
@@ -21,6 +25,6 @@ export const getTour = catchAsync(async (req, res, _next) => {
   });
 });
 
-export const loginUser = catchAsync(async (req, res, next) => {
+export const loginUser = catchAsync(async (_req, res, _next) => {
   res.status(200).render('login', { title: 'Login' });
 });

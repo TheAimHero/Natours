@@ -46,7 +46,7 @@ export const logout = catchAsync(async (_req, res, _next) => {
   res.status(200).json({ status: 'success' });
 });
 
-export const protect = catchAsync(async (req, _res, next) => {
+export const protect = catchAsync(async (req, res, next) => {
   let token = tokenUtils.extractToken(req);
 
   const decoded = token && (await tokenUtils.verifyToken(token));
@@ -60,6 +60,7 @@ export const protect = catchAsync(async (req, _res, next) => {
   }
 
   req.user = freshUser;
+  res.locals.user = freshUser;
   next();
 });
 
