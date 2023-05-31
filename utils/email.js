@@ -49,4 +49,11 @@ export class Email {
   async sendWelcome() {
     await this.send('welcome', 'Welcome to Natours');
   }
+
+  async sendPasswordReset() {
+    await this.send(
+      'passwordReset',
+      'Your password reset token (valid for only 10 minutes)'
+    );
+  }
 }
