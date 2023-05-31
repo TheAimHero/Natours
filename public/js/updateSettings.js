@@ -2,6 +2,7 @@ import { showAlerts } from './alerts.js';
 
 export async function updateSettings(data) {
   try {
+    // eslint-disable-next-line no-undef
     const res = await axios({
       method: 'PATCH',
       url: 'http://localhost:3000/api/v1/users/update-me',
@@ -18,6 +19,7 @@ export async function updateSettings(data) {
 
 export async function updatePassword(data) {
   try {
+    // eslint-disable-next-line no-undef
     const res = await axios({
       method: 'PATCH',
       url: 'http://localhost:3000/api/v1/users/update-password',

@@ -48,8 +48,8 @@ export const resizeTourPhotos = catchAsync(async (req, _res, next) => {
       .toFile(`public/img/tours/${imageFileName}`);
   });
 
+  // eslint-disable-next-line no-undef
   await Promise.all(promiseArr);
-  console.log(req.body);
   next();
 });
 

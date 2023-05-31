@@ -6,7 +6,7 @@ import catchAsync from '../utils/catchAsync.js';
 import usersModel from '../model/usersModel.js';
 import appError from '../utils/appError.js';
 import * as tokenUtils from '../utils/tokenUtils.js';
-import { sendEmail } from '../utils/email.js';
+import { Email } from '../utils/email.js';
 
 export const signUp = catchAsync(async (req, res, _next) => {
   const { name, email, role, password, passwordConfirm } = req.body;
@@ -18,6 +18,8 @@ export const signUp = catchAsync(async (req, res, _next) => {
     role: String(role),
   });
   user.password = user.passwordChangedAt = undefined;
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  await new Email(user, url).sendWelcome();
   createSendToken(user, 201, res);
 });
 
@@ -105,6 +107,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 
   try {
+    // FIX: Not working fix later
     await sendEmail(email, 'Your password reset token', message);
     res
       .status(200)

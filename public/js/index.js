@@ -4,7 +4,7 @@ import { updateSettings, updatePassword } from './updateSettings.js';
 
 const loginForm = document.querySelector('.form--login');
 if (loginForm) {
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', e => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -21,7 +21,7 @@ if (mapBox) {
 
 const logoutBtn = document.querySelector('.nav__el--logout');
 if (logoutBtn) {
-  logoutBtn.addEventListener('click', (e) => {
+  logoutBtn.addEventListener('click', e => {
     e.preventDefault();
     logout();
   });
@@ -29,7 +29,7 @@ if (logoutBtn) {
 
 const userDataForm = document.querySelector('.form--user-data');
 if (userDataForm) {
-  userDataForm.addEventListener('submit', (e) => {
+  userDataForm.addEventListener('submit', e => {
     e.preventDefault();
     const form = new FormData();
     form.append('name', document.getElementById('name').value);
@@ -43,7 +43,7 @@ if (userDataForm) {
 
 const userPassword = document.querySelector('.form-user-settings');
 if (userPassword) {
-  userPassword.addEventListener('submit', (e) => {
+  userPassword.addEventListener('submit', e => {
     e.preventDefault();
     const passwordConfirm = document.getElementById('password-confirm').value;
     const newPassword = document.getElementById('password').value;

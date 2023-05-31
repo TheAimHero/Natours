@@ -14,8 +14,8 @@ html(lang='en')
     include _header
 
     block content
+    script( type='module' src='/js/bundle.js')
     script( src="https://unpkg.com/axios/dist/axios.min.js" )
-    script( type="module" src='/js/bundle.js')
 
     include _footer
 

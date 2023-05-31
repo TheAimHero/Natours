@@ -85,6 +85,7 @@ async function $e33d9ff231aec008$export$a0973bcfe11b05c9() {
 
 async function $a7bd2b0e83ecbd10$export$f558026a994b6051(data) {
     try {
+        // eslint-disable-next-line no-undef
         const res = await axios({
             method: "PATCH",
             url: "http://localhost:3000/api/v1/users/update-me",
@@ -100,6 +101,7 @@ async function $a7bd2b0e83ecbd10$export$f558026a994b6051(data) {
 }
 async function $a7bd2b0e83ecbd10$export$e2853351e15b7895(data) {
     try {
+        // eslint-disable-next-line no-undef
         const res = await axios({
             method: "PATCH",
             url: "http://localhost:3000/api/v1/users/update-password",
